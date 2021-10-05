@@ -65,8 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
         );
         _secret = Random().nextInt(10);
       } else {
-        _chancesLeft--;
         //try again
+        _chancesLeft--;
         createDialog(context);
       }
     }
@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           return Dialog(
               elevation: 5.0,
               child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 5.0,horizontal: 0.0),
                 child: Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
