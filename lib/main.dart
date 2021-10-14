@@ -10,93 +10,19 @@ void main() {
       primarySwatch: Colors.blue,
     ),
     translations: Messages(),
-    locale: const Locale('en','US'),
-    fallbackLocale: const Locale('en','US'),
-    home: const MyHomePage(),
+    locale: const Locale('en', 'US'),
+    fallbackLocale: const Locale('en', 'US'),
+    home: MyHomePage(),
   ));
 }
 
 class Controller extends GetxController {
-  var count = 0.obs;
-  increment() => count++;
-
   int _secret = Random().nextInt(10);
-  int _chancesLeft = 3;
+  var _chancesLeft = 3;
 
-
-  _evaluateGuess(myController) {
-    String _guess = myController.text;
-    debugPrint('guess: $_guess');
-    debugPrint('secret: $_secret');
-
-    myController.value = const TextEditingValue(text: "");
-
-    if (_guess == _secret.toString()) {
-      //go to success screen  ==> SuccessScreen
-      Get.to(SuccessScreen(value: _secret.toString()));
-      _secret = Random().nextInt(10);
-      _chancesLeft = 3;
-    } else {
-      if (_chancesLeft <= 1) {
-        //go to game over screen screen ==> FailedScreen
-        _chancesLeft = 3;
-        Get.to(const FailedScreen());
-        _secret = Random().nextInt(10);
-      } else {
-        //try again
-        _chancesLeft--;
-        createDialog();
-      }
-    }
-  }
-
-  createDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-              elevation: 5.0,
-              child: Container(
-                padding:
-                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0.0),
-                child: Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("dialog_msg".tr,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headline5),
-                      Text("dialog_pre".tr,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headline5),
-                      Text("$_chancesLeft",
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headline2),
-                      Text("dialog_post".tr,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headline5),
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(0, 50, 0, 20.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: ButtonStyle(
-                            padding: MaterialStateProperty.all(
-                                const EdgeInsets.symmetric(
-                                    vertical: 15.0, horizontal: 100.0)),
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 50, 200, 255)),
-                          ),
-                          child: Text('dialog_cta'.tr),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ));
-        });
+  reset() {
+    _secret = Random().nextInt(10);
+    _chancesLeft = 3;
   }
 
 }
@@ -139,12 +65,40 @@ class Messages extends Translations {
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({Key? key}) : super(key: key);
-
+  final Controller controller = Get.put(Controller());
   final TextEditingController myController = TextEditingController();
+
+  _evaluateGuess(myController) {
+    String _guess = myController.text;
+    debugPrint('guess: $_guess');
+    debugPrint('secret: $controller._secret');
+
+    myController.value = const TextEditingValue(text: "");
+
+    if (_guess == controller._secret.toString()) {
+      //go to success screen  ==> SuccessScreen
+      Get.to(SuccessScreen(value: controller._secret.toString()));
+      controller._secret = Random().nextInt(10);
+      controller._chancesLeft = 3;
+    } else {
+      if (controller._chancesLeft <= 1) {
+        //go to game over screen screen ==> FailedScreen
+        controller._chancesLeft = 3;
+        Get.to(const FailedScreen());
+        controller._secret = Random().nextInt(10);
+      } else {
+        //try again
+        controller._chancesLeft--;
+        Get.snackbar("Wrong guess", "You have only ${controller._chancesLeft} tries left",snackPosition: );
+      }
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
-    final Controller controller = Get.put(Controller());
+
     return Scaffold(
       appBar: AppBar(
         title: Text('home_title'.tr),
@@ -184,7 +138,7 @@ class MyHomePage extends StatelessWidget {
                   backgroundColor: MaterialStateProperty.all(
                       const Color.fromARGB(100, 010, 255, 0)),
                 ),
-                onPressed: controller._evaluateGuess(myController),
+                onPressed: _evaluateGuess(myController),
                 child: Text('home_cta'.tr),
               ),
             ],
